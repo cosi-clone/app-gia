@@ -1,0 +1,5 @@
+window.ReaderSessions={
+  open(){return new Promise((resolve,reject)=>{const request=indexedDB.open('ExcelOnlineReader',1);request.onupgradeneeded=()=>{request.result.createObjectStore('sessions',{keyPath:'id'});};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(Error('Không mở được bộ nhớ trình duyệt. Hãy kiểm tra quyền lưu trữ của trang.'));});},
+  async save(value){const db=await this.open();try{return await new Promise((resolve,reject)=>{const tx=db.transaction('sessions','readwrite');tx.objectStore('sessions').put(value);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(Error('Không lưu được phiên đọc; bộ nhớ trình duyệt có thể đã đầy.'));tx.onabort=()=>reject(Error('Phiên đọc chưa lưu được.'));});}finally{db.close();}},
+  async get(id){const db=await this.open();try{return await new Promise((resolve,reject)=>{const request=db.transaction('sessions').objectStore('sessions').get(id);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(Error('Không đọc được phiên đã lưu.'));});}finally{db.close();}}
+};

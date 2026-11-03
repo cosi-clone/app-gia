@@ -27,50 +27,6 @@ function splitStory(text) {
   }
   return chunks;
 }
-async function processPdfUrl(value, progress = () => {}) {
-  let url;
-  try { url = new URL(value.trim()); } catch { throw Error('Link không hợp lệ. Dán URL đầy đủ bắt đầu bằng https:// hoặc http://.'); }
-  if (!['http:','https:'].includes(url.protocol) || url.username || url.password) throw Error('Chỉ hỗ trợ link HTTP/HTTPS không chứa thông tin đăng nhập.');
-  const limit = 100 * 1024 * 1024;
-  async function download(target, milliseconds) {
-    const controller = new AbortController(), timer = setTimeout(()=>controller.abort(), milliseconds);
-    try {
-      const response = await fetch(target, {signal:controller.signal,credentials:'omit',referrerPolicy:'no-referrer'});
-      if(!response.ok) {
-        if (target.startsWith('/api/')) {
-          const error = await response.json().catch(()=>({}));
-          throw Error(error.error || `API tải PDF trả HTTP ${response.status}.`);
-        }
-        throw Error(`Nguồn PDF trả HTTP ${response.status}.`);
-      }
-      if(Number(response.headers.get('content-length')) > limit) throw Error('PDF vượt giới hạn 100 MB.');
-      const reader = response.body?.getReader();
-      let bytes;
-      if (reader) {
-        const chunks = []; let size = 0;
-        try {
-          while(true) { const {done,value} = await reader.read(); if(done)break; size += value.byteLength; if(size>limit) {controller.abort();throw Error('PDF vượt giới hạn 100 MB.');} chunks.push(value);progress(`Đang tải PDF: ${(size/1048576).toFixed(1)} MB…`); }
-        } finally { reader.releaseLock(); }
-        bytes = new Uint8Array(size); let offset = 0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
-      } else { bytes = new Uint8Array(await response.arrayBuffer()); if(bytes.byteLength>limit)throw Error('PDF vượt giới hạn 100 MB.'); }
-      if(!Array.from(bytes.slice(0,1024), b=>String.fromCharCode(b)).join('').includes('%PDF-')) throw Error('Link không trả về file PDF; có thể là trang web, trang đăng nhập hoặc link hết hạn.');
-      return bytes;
-    } finally { clearTimeout(timer); }
-  }
-  progress('Đang tải PDF từ link…');
-  let bytes;
-  try { bytes = await download(url.href,15000); }
-  catch (directError) {
-    progress('Không tải trực tiếp được; đang thử qua API…');
-    try { bytes = await download('/api/pdf?url='+encodeURIComponent(url.href),100000); }
-    catch(error) {throw Error(`Không tải được PDF: ${error.message} Có thể tải PDF về máy rồi dùng chức năng upload PDF.`);}
-  }
-  let name;
-  try {name=decodeURIComponent(url.pathname.split('/').pop() || 'online.pdf');}catch{name='online.pdf';}
-  if(!name.toLowerCase().endsWith('.pdf')) name += '.pdf';
-  const file = new File([bytes],name,{type:'application/pdf'});
-  await processDocumentFile(file,progress);
-}
 async function processDocumentFile(file, progress = () => {}) {
   if (file.size > 100 * 1024 * 1024) throw Error('Tài liệu tối đa 100 MB.');
   const extension = file.name.split('.').pop().toLowerCase();

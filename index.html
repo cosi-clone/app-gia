@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chuẩn bị bảng tính</title><link rel="stylesheet" href="setup.css">
+<script src="static/jszip.min.js" defer></script><script src="documents.js" defer></script>
+<script src="workbook.js" defer></script><script src="layout.js" defer></script>
+<script src="session.js" defer></script><script src="setup.js" defer></script>
+</head>
+<body>
+<main class="setup">
+<header><div class="mark">X</div><div><h1>Chuẩn bị bảng tính</h1><p>Chọn file PDF và template Excel của bạn.</p></div></header>
+<section><h2>1. Upload truyện PDF</h2><label for="story-file">File PDF từ máy của bạn</label><input id="story-file" type="file" accept=".pdf,application/pdf"><p id="story-meta" class="hint">PDF được đọc ngay trong trình duyệt rồi chia thành từng đoạn để đưa vào ô Excel.</p></section>
+<section><h2>2. Chọn template Excel</h2><label for="template-file">File .xlsx</label><input id="template-file" type="file" accept=".xlsx"><div class="fields"><label>Sheet<select id="sheet" disabled></select></label><label>Cột chèn truyện<select id="column" disabled></select></label><label>Từ dòng<input id="start-row" type="number" min="1" value="6" disabled></label></div><p id="template-meta" class="hint">Toàn bộ các cột khác được dùng làm nền của bảng tính.</p><div id="preview" class="preview"></div></section>
+<section class="summary"><p id="plan-info">Tải truyện và chọn XLSX để xem số hàng cần dùng.</p><button id="open-reader" disabled>Mở tab Excel để đọc ↗</button><p class="hint">Tab mới chỉ có giao diện Excel. Bấm nút □ trên thanh tiêu đề để bật toàn màn hình.</p></section>
+<p id="status" role="status" aria-live="polite"></p>
+</main></body></html>
