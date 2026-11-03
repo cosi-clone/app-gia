@@ -1,6 +1,48 @@
 (function(root) {
   'use strict';
 
+  function repeatEnd(sheet, startRow) {
+    const filledRows = new Set();
+
+    for (const [ref, cell] of sheet.cells) {
+      const value = String(cell.value ?? '').trim();
+
+      // Ô trống hoặc chỉ có giá trị 0 không xác định
+      // đây là một hàng dữ liệu thực.
+      if (
+        !value ||
+        /^[+-]?0+(?:[.,]0+)?$/.test(value)
+      ) {
+        continue;
+      }
+
+      const row = +(ref.match(/\d+$/)?.[0] || 0);
+
+      if (
+        row >= startRow &&
+        !sheet.rows.get(row)?.hidden
+      ) {
+        filledRows.add(row);
+      }
+    }
+
+    let lastDataRow = 0;
+
+    for (let row = startRow; row <= sheet.maxR; row++) {
+      if (sheet.rows.get(row)?.hidden) continue;
+
+      if (filledRows.has(row)) {
+        lastDataRow = row;
+      } else if (lastDataRow) {
+        // Hết vùng dữ liệu đang hiển thị.
+        // File mẫu: kết thúc ở 145, không kéo tới 940.
+        return lastDataRow;
+      }
+    }
+
+    return lastDataRow || sheet.maxR;
+  }
+
   function makePlan(book, sheetIndex, column, startRow, chunks) {
     const sheet = book.sheets[sheetIndex];
 
@@ -44,15 +86,26 @@
     ) {
       throw Error(
         'Dòng bắt đầu cắt ngang ô gộp. ' +
-        'Hãy chọn dòng đầu ô gộp hoặc dòng ngay sau ô gộp.'
+        'Chọn dòng đầu ô gộp hoặc dòng ngay sau ô gộp.'
       );
     }
 
-    // Lặp nguyên khối từ hàng bắt đầu đến hết sheet.
-    const endRow = sheet.maxR;
-    const blockLength = endRow - startRow + 1;
+    const endRow = repeatEnd(sheet, startRow);
 
-    // Những hàng có thể chèn truyện trong mỗi khối.
+    if (
+      sheet.merges.some(
+        merge =>
+          merge.a.r <= endRow &&
+          merge.b.r > endRow
+      )
+    ) {
+      throw Error(
+        'Cuối khối lặp cắt ngang ô gộp. ' +
+        'Hãy kiểm tra vùng mẫu.'
+      );
+    }
+
+    const blockLength = endRow - startRow + 1;
     const eligible = [];
 
     for (let row = startRow; row <= endRow; row++) {
@@ -66,15 +119,14 @@
           column <= merge.b.c
       );
 
-      if (merged) continue;
-
-      eligible.push(row);
+      if (!merged) {
+        eligible.push(row);
+      }
     }
 
     if (!eligible.length) {
       throw Error(
-        'Vùng chọn không có ô phù hợp để chèn truyện: ' +
-        'các hàng đang ẩn hoặc cột nằm trong ô gộp.'
+        'Vùng chọn không có ô phù hợp để chèn truyện.'
       );
     }
 
@@ -100,7 +152,8 @@
       for (const source of eligible) {
         if (storyRows.length >= chunks.length) break;
 
-        const target = source + copy * blockLength;
+        const target =
+          source + copy * blockLength;
 
         storyAt.set(target, storyRows.length);
         storyRows.push(target);
@@ -108,6 +161,7 @@
     }
 
     return {
+      layoutVersion: 3,
       sheetIndex,
       column,
       startRow,
@@ -121,7 +175,6 @@
     };
   }
 
-  // Mọi cột ở hàng lặp đều đọc lại cùng một hàng nguồn.
   function sourceRow(sheet, plan, row) {
     const endRow = plan.endRow ?? sheet.maxR;
 
@@ -167,14 +220,11 @@
     const ref =
       root.ExcelWorkbook.colName(column) + source;
 
-    // Luôn lấy nội dung và định dạng Excel gốc trước.
     const original = sheet.cells.get(ref) || {
       value: '',
       style: sheet.cols.get(column)?.style || 0
     };
 
-    // Chỉ chèn đè cột truyện khi đang bật chế độ truyện.
-    // Reader đặt column = -1 khi nhấn B để hiện Excel gốc.
     if (
       column === plan.column &&
       plan.storyAt.has(row)
@@ -186,6 +236,9 @@
       };
     }
 
+    // Các cột khác luôn lặp nội dung Excel gốc.
+    // Nhấn B: reader đặt column = -1 nên cột truyện
+    // cũng đi qua đây và hiện nội dung Excel gốc.
     return {
       ...original,
       story: false
