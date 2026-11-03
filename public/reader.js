@@ -19,6 +19,7 @@
   const redoStack = [];
 
   const key = (r, c) => ExcelWorkbook.colName(c) + r;
+
   const clamp = (value, min, max) =>
     Math.max(min, Math.min(max, value));
 
@@ -70,6 +71,7 @@
       }
     }).catch(error => {
       $('status-ready-label').textContent = 'Chưa lưu';
+
       notice(
         error.message + ' Bấm Ctrl/Cmd+S để thử lưu lại.'
       );
@@ -152,8 +154,8 @@
 
     const lines = String(value)
       .split('\n')
-      .reduce((n, line) => {
-        return n + Math.max(
+      .reduce((count, line) => {
+        return count + Math.max(
           1,
           Math.ceil(line.length / perLine)
         );
@@ -174,6 +176,7 @@
     }
 
     const editsByRow = new Map();
+
     const edits = showStory
       ? state.cells
       : state.originalCells;
@@ -241,7 +244,8 @@
           }
 
           const cell = cellAt(r, edit.c);
-          const css = session.book.styles[cell.style] || {};
+          const css =
+            session.book.styles[cell.style] || {};
 
           if (
             cell.story ||
@@ -276,7 +280,8 @@
 
   function rebuild() {
     const row = lowerBound(scroll.scrollTop);
-    const offset = scroll.scrollTop - prefix[row - 1];
+    const offset =
+      scroll.scrollTop - prefix[row - 1];
 
     buildGeometry();
 
@@ -400,11 +405,7 @@
       );
 
       c = columns[
-        clamp(
-          index + dc,
-          0,
-          columns.length - 1
-        )
+        clamp(index + dc, 0, columns.length - 1)
       ];
     }
 
@@ -493,6 +494,7 @@
     }
 
     inner.className = 'reader-cell-inner';
+
     inner.style.height =
       Math.max(1, height - 1) + 'px';
 
@@ -578,10 +580,10 @@
 
       col.dataset.column = c;
       col.style.width = colWidth(c) + 'px';
+
       cg.append(col);
 
       const th = document.createElement('th');
-
       th.dataset.column = c;
 
       th.append(
@@ -605,6 +607,7 @@
       if (!heights[r]) continue;
 
       const tr = document.createElement('tr');
+
       tr.style.height = heights[r] + 'px';
 
       const number = document.createElement('th');
@@ -620,9 +623,7 @@
       for (const c of columns) {
         const td = cellElement(r, c, from, to);
 
-        if (td) {
-          tr.append(td);
-        }
+        if (td) tr.append(td);
       }
 
       body.append(tr);
@@ -649,13 +650,11 @@
     const at = lowerBound(scroll.scrollTop);
 
     const done = plan.storyRows.filter(
-      r => r <= at
+      row => row <= at
     ).length;
 
     const percent = plan.storyRows.length
-      ? Math.round(
-          done / plan.storyRows.length * 100
-        )
+      ? Math.round(done / plan.storyRows.length * 100)
       : 0;
 
     $('status-reading-info').textContent =
@@ -780,43 +779,31 @@
     input.spellcheck = false;
 
     input.value = seed ??
-      String(
-        cellAt(selected.r, selected.c).value
-      );
+      String(cellAt(selected.r, selected.c).value);
 
     input.style.left =
-      clamp(
-        rect.left,
-        2,
-        innerWidth - 100
-      ) + 'px';
+      clamp(rect.left, 2, innerWidth - 100) + 'px';
 
     input.style.top =
-      clamp(
-        rect.top,
-        2,
-        innerHeight - 40
-      ) + 'px';
+      clamp(rect.top, 2, innerHeight - 40) + 'px';
 
-    input.style.width =
-      clamp(
-        rect.width,
-        100,
-        innerWidth - Math.max(2, rect.left) - 4
-      ) + 'px';
+    input.style.width = clamp(
+      rect.width,
+      100,
+      innerWidth - Math.max(2, rect.left) - 4
+    ) + 'px';
 
-    input.style.height =
-      clamp(
-        rect.height,
-        32,
-        Math.max(
-          40,
-          Math.min(
-            320,
-            innerHeight - rect.top - 5
-          )
+    input.style.height = clamp(
+      rect.height,
+      32,
+      Math.max(
+        40,
+        Math.min(
+          320,
+          innerHeight - rect.top - 5
         )
-      ) + 'px';
+      )
+    ) + 'px';
 
     editor = {
       input,
@@ -862,12 +849,8 @@
         finishEditor(true);
 
         move(
-          event.key === 'Enter'
-            ? direction
-            : 0,
-          event.key === 'Tab'
-            ? direction
-            : 0
+          event.key === 'Enter' ? direction : 0,
+          event.key === 'Tab' ? direction : 0
         );
 
         scroll.focus();
@@ -894,11 +877,7 @@
     draft = null;
 
     if (commit) {
-      setCell(
-        current.r,
-        current.c,
-        value
-      );
+      setCell(current.r, current.c, value);
     }
 
     syncSelection();
@@ -963,14 +942,8 @@
     finishEditor(true);
     finishFormula(true);
 
-    const from = redo
-      ? redoStack
-      : undoStack;
-
-    const to = redo
-      ? undoStack
-      : redoStack;
-
+    const from = redo ? redoStack : undoStack;
+    const to = redo ? undoStack : redoStack;
     const change = from.pop();
 
     if (!change) return;
@@ -984,16 +957,13 @@
     finishFormula(true);
 
     if (type === 'row') {
-      record(
-        'rows',
-        index,
-        undefined
-      );
-
+      record('rows', index, undefined);
       return;
     }
 
-    const canvas = document.createElement('canvas');
+    const canvas =
+      document.createElement('canvas');
+
     const context = canvas.getContext('2d');
 
     let width = 36;
@@ -1024,11 +994,7 @@
     record(
       'columns',
       index,
-      clamp(
-        Math.ceil(width),
-        36,
-        1600
-      )
+      clamp(Math.ceil(width), 36, 1600)
     );
   }
 
@@ -1262,16 +1228,9 @@
   };
 
   scroll.onkeydown = event => {
-    if (
-      !sheet ||
-      event.isComposing
-    ) {
-      return;
-    }
+    if (!sheet || event.isComposing) return;
 
-    if (toggleShortcut(event)) {
-      return;
-    }
+    if (toggleShortcut(event)) return;
 
     const modifier =
       event.ctrlKey || event.metaKey;
@@ -1373,9 +1332,7 @@
   });
 
   document.addEventListener('keydown', event => {
-    if (toggleShortcut(event)) {
-      return;
-    }
+    if (toggleShortcut(event)) return;
 
     if (
       (event.ctrlKey || event.metaKey) &&
@@ -1410,9 +1367,7 @@
 
     event.preventDefault();
 
-    if (event.repeat) {
-      return true;
-    }
+    if (event.repeat) return true;
 
     showStory = !showStory;
     rebuild();
@@ -1434,6 +1389,7 @@
           ...session.plan,
           column: -1,
           startRow: 1,
+          endRow: sheet.maxR,
           blockLength: sheet.maxR,
           totalRows: sheet.maxR,
           storyAt: new Map(),
@@ -1593,22 +1549,18 @@
   };
 
   $('excel-btn-font-inc').onclick = () => {
-    fontSize = Math.min(
-      24,
-      fontSize + 1
-    );
+    fontSize = Math.min(24, fontSize + 1);
 
     $('excel-select-font-size').value = fontSize;
+
     changeFont();
   };
 
   $('excel-btn-font-dec').onclick = () => {
-    fontSize = Math.max(
-      8,
-      fontSize - 1
-    );
+    fontSize = Math.max(8, fontSize - 1);
 
     $('excel-select-font-size').value = fontSize;
+
     changeFont();
   };
 
@@ -1623,8 +1575,7 @@
   };
 
   if ($('excel-btn-undo')) {
-    $('excel-btn-undo').onclick =
-      () => undo();
+    $('excel-btn-undo').onclick = () => undo();
   }
 
   window.addEventListener('resize', () => {
@@ -1646,14 +1597,12 @@
 
       if (!session) {
         throw Error(
-          'Không tìm thấy phiên đọc. Hãy mở lại từ trang chuẩn bị.'
+          'Không tìm thấy phiên đọc. ' +
+          'Hãy mở lại từ trang chuẩn bị.'
         );
       }
 
-      session.editor ||= {
-        sheets: {}
-      };
-
+      session.editor ||= { sheets: {} };
       session.editor.sheets ||= {};
 
       const font = session.editor.font || {
@@ -1689,7 +1638,6 @@
 
             button.className = 'sheet-tab';
             button.textContent = item.name;
-
             button.onclick = () => activate(index);
 
             return button;
@@ -1701,7 +1649,8 @@
       $('status-ready-label').textContent =
         'Sẵn sàng';
     } catch (error) {
-      const message = document.createElement('p');
+      const message =
+        document.createElement('p');
 
       message.className = 'reader-error';
       message.textContent = error.message;
