@@ -5,9 +5,10 @@
 <title>Chuẩn bị bảng tính</title><link rel="stylesheet" href="setup.css">
 <script src="static/jszip.min.js" defer></script><script src="documents.js" defer></script>
 <script src="workbook.js" defer></script><script src="layout.js" defer></script>
-<script src="session.js" defer></script><script src="setup.js" defer></script>
+<script src="session.js" defer></script><script type="module" src="setup-loader.js"></script>
+<link rel="stylesheet" href="auth.css">
 </head>
-<body>
+<body class="access-loading">
 <main class="setup">
 <header><div class="mark">X</div><div><h1>Chuẩn bị bảng tính</h1><p>Chọn file PDF và template Excel của bạn.</p></div></header>
 <section><h2>1. Upload truyện PDF</h2><label for="story-file">File PDF từ máy của bạn</label><input id="story-file" type="file" accept=".pdf,application/pdf"><p id="story-meta" class="hint">PDF được đọc ngay trong trình duyệt rồi chia thành từng đoạn để đưa vào ô Excel.</p></section>

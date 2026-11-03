@@ -22,17 +22,17 @@
     const file=event.target.files[0];if(!file)return;
     if(!file.name.toLowerCase().endsWith('.pdf')){event.target.value='';return status('Chọn file PDF từ máy của bạn.');}
     controls(true);status('Đang đọc PDF…');
-    try{await processDocumentFile(file,status);$('story-meta').textContent=`${state.fileName} • ${state.allChunks.length.toLocaleString('vi-VN')} đoạn đã sẵn sàng.`;status('Đã đọc PDF. Chọn vị trí trong template rồi mở tab Excel.');}
+    try{await Access.requireActive();await processDocumentFile(file,status);$('story-meta').textContent=`${state.fileName} • ${state.allChunks.length.toLocaleString('vi-VN')} đoạn đã sẵn sàng.`;status('Đã đọc PDF. Chọn vị trí trong template rồi mở tab Excel.');}
     catch(error){status(error.message);}
     finally{event.target.value='';updatePlan();controls(false);}
   };
-  $('template-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;controls(true);status('Đang đọc template…');try{book=await ExcelWorkbook.readBook(file);$('sheet').replaceChildren(...book.sheets.map((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.name;return o;}));$('sheet').value='0';selectSheet();status('Đã đọc template. Kiểm tra cột và dòng bắt đầu trước khi mở tab.');}catch(e){status(e.message);}finally{e.target.value='';controls(false);}};
+  $('template-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;controls(true);status('Đang đọc template…');try{await Access.requireActive();book=await ExcelWorkbook.readBook(file);$('sheet').replaceChildren(...book.sheets.map((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.name;return o;}));$('sheet').value='0';selectSheet();status('Đã đọc template. Kiểm tra cột và dòng bắt đầu trước khi mở tab.');}catch(e){status(e.message);}finally{e.target.value='';controls(false);}};
   $('sheet').onchange=selectSheet;$('column').onchange=updatePlan;$('start-row').oninput=()=>{preview();updatePlan();};
   $('open-reader').onclick=async()=>{
     if(!plan||busy)return;
     const target=window.open('about:blank','_blank');
     if(!target)return status('Trình duyệt đã chặn tab mới. Cho phép mở cửa sổ bật lên cho trang rồi bấm lại.');
     controls(true);
-    try{const id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);await ReaderSessions.save({id,book,chunks:state.allChunks.map(c=>c.text),storyName:state.fileName,plan,createdAt:Date.now()});target.location.replace('reader.html#'+id);status('Đã mở tab Excel riêng. Bấm nút □ trong tab đó để bật toàn màn hình.');}catch(e){target.close();status(e.message);}finally{controls(false);}
+    try{await Access.requireActive();const id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);await ReaderSessions.save({id,book,chunks:state.allChunks.map(c=>c.text),storyName:state.fileName,plan,createdAt:Date.now()});target.location.replace('reader.html#'+id);status('Đã mở tab Excel riêng. Bấm nút □ trong tab đó để bật toàn màn hình.');}catch(e){target.close();status(e.message);}finally{controls(false);}
   };
 })();

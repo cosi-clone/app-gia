@@ -1,6 +1,10 @@
-.vercel/
-__pycache__/
-*.pyc
+node_modules/
 .env
 .env.*
+!.env.example
+.vercel/
+service-account*.json
+*adminsdk*.json
+coverage/
 .DS_Store
+public/firebase-client.js
