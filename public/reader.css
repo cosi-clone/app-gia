@@ -1,3 +1,424 @@
-html,body.theme-excel{width:100%;height:100%;margin:0;overflow:hidden;background:white;font-family:"Segoe UI",Calibri,Arial,sans-serif}
-body.theme-excel{display:flex!important;flex-direction:column!important}
-.theme-header-container{flex:none!important}.excel-title-bar{height:38px;min-height:38px}.excel-title-bar .left-section{min-width:0}.document-title-wrap{display:flex;min-width:0}.document-name{max-width:360px;overflow:hidden;text-overflow:ellipsis}.center-search{min-width:120px}.excel-tabs-left{display:flex}.excel-ribbon-tabs{justify-content:space-between;min-height:31px}.excel-share-btn{margin:0 12px 4px auto;background:#107c41;color:white;border:0;padding:5px 12px;border-radius:3px;display:flex;align-items:center;gap:6px}.excel-ribbon-body{overflow-x:auto;overflow-y:hidden;min-height:104px;height:104px;gap:12px}.ribbon-group{flex:none}.ribbon-group-content{display:flex;gap:6px;align-items:center;height:72px}.small-actions-col,.styles-actions-col{display:flex;flex-direction:column;gap:3px}.row-sub{display:flex}.tool-btn-wide,.edit-action-btn,.cell-action-btn,.style-action-btn{border:0;background:transparent;display:flex;gap:5px;align-items:center;font:11px "Segoe UI",Arial;padding:3px}.tool-btn-wide{max-width:120px}.paste-btn-large{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px}.styles-gallery-wrap{display:flex;gap:4px}.style-card{width:72px;border:1px solid #bbb;font-size:10px;background:white;text-align:center}.style-card-header{padding:6px;color:white}.style-card-body{padding:5px}.accent4{background:#8064a2}.accent5{background:#4bacc6}.accent6{background:#f79646}.excel-formula-bar-container{flex:none!important;min-height:31px}.formula-input-wrapper{flex:1;min-width:0}.formula-input{width:100%;text-overflow:ellipsis}.excel-workspace{flex:1 1 0!important;min-height:0!important;overflow:hidden}.sheet-content.active{height:100%;display:block!important}.table-container{height:100%;overflow:auto;outline:none;overscroll-behavior:contain}.excel-sheets-bar{flex:none!important;min-height:30px;height:auto!important;display:flex!important;align-items:center;justify-content:space-between;gap:12px;background:#f3f2f1;border-top:1px solid #d3d3d3}.sheet-tabs-list{overflow:auto;min-width:80px;max-width:65%;gap:0;white-space:nowrap}.sheet-tab{flex:none;min-height:30px;padding:5px 16px}.excel-status-bar{gap:12px;white-space:nowrap;font-size:11px;padding:0 12px}.reader-grid{border-spacing:0;border-collapse:separate;table-layout:fixed;background:white;width:max-content;font:11pt Calibri,"Segoe UI",Arial}.reader-grid td,.reader-grid th{padding:0;box-sizing:border-box;border:0;border-right:1px solid #dedede;border-bottom:1px solid #dedede;overflow:hidden}.reader-grid thead th{height:25px;position:sticky;top:0;z-index:4;background:#f3f3f3;color:#333;text-align:center;font:12px "Segoe UI",Arial;cursor:pointer}.reader-grid tbody th{position:sticky;left:0;z-index:2;background:#f3f3f3;color:#555;text-align:center;font:11px "Segoe UI",Arial;width:48px}.reader-grid thead th:first-child{left:0;z-index:6}.reader-grid td{vertical-align:bottom;cursor:cell}.reader-cell-inner{padding:3px 5px;overflow:hidden;white-space:pre;box-sizing:border-box;user-select:text}.reader-grid td.reader-story .reader-cell-inner{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45;font-size:var(--reader-font-size,11pt);font-family:var(--reader-font-family,Calibri);font-weight:var(--reader-font-weight,normal);font-style:var(--reader-font-style,normal)}.reader-grid td.active-cell{outline:2px solid #107c41;outline-offset:-2px;position:relative}.reader-grid .reader-spacer td{border:0;padding:0;line-height:0;font-size:0}.reader-grid .active-column{background:#d6e9db}.reader-grid tbody th.active-row{background:#d6e9db;color:#107c41}.reader-error{padding:40px;color:#8d3422;font:16px Arial;line-height:1.7}#reader-notice{position:fixed;bottom:45px;left:50%;transform:translateX(-50%);z-index:10000;background:#333;color:#fff;padding:10px 18px;border-radius:5px;font:13px Arial;max-width:80%}@media(max-width:900px){.center-search{display:none}.document-name{max-width:240px}.excel-status-bar .sum-item,.excel-status-bar .count-item{display:none}.excel-ribbon-tabs{overflow:auto}.excel-tabs-left{flex:none}.excel-share-btn{display:none}}
+html,
+body.theme-excel {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: white;
+  font-family: "Segoe UI", Calibri, Arial, sans-serif;
+}
+
+body.theme-excel {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.theme-header-container {
+  flex: none !important;
+}
+
+.excel-title-bar {
+  height: 38px;
+  min-height: 38px;
+}
+
+.excel-title-bar .left-section {
+  min-width: 0;
+}
+
+.document-title-wrap {
+  display: flex;
+  min-width: 0;
+}
+
+.document-name {
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.center-search {
+  min-width: 120px;
+}
+
+.excel-tabs-left {
+  display: flex;
+}
+
+.excel-ribbon-tabs {
+  justify-content: space-between;
+  min-height: 31px;
+}
+
+.excel-share-btn {
+  margin: 0 12px 4px auto;
+  background: #107c41;
+  color: white;
+  border: 0;
+  padding: 5px 12px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.excel-ribbon-body {
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-height: 104px;
+  height: 104px;
+  gap: 12px;
+}
+
+.ribbon-group {
+  flex: none;
+}
+
+.ribbon-group-content {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  height: 72px;
+}
+
+.small-actions-col,
+.styles-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.row-sub {
+  display: flex;
+}
+
+.tool-btn-wide,
+.edit-action-btn,
+.cell-action-btn,
+.style-action-btn {
+  border: 0;
+  background: transparent;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font: 11px "Segoe UI", Arial;
+  padding: 3px;
+}
+
+.tool-btn-wide {
+  max-width: 120px;
+}
+
+.paste-btn-large {
+  border: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.styles-gallery-wrap {
+  display: flex;
+  gap: 4px;
+}
+
+.style-card {
+  width: 72px;
+  border: 1px solid #bbb;
+  font-size: 10px;
+  background: white;
+  text-align: center;
+}
+
+.style-card-header {
+  padding: 6px;
+  color: white;
+}
+
+.style-card-body {
+  padding: 5px;
+}
+
+.accent4 {
+  background: #8064a2;
+}
+
+.accent5 {
+  background: #4bacc6;
+}
+
+.accent6 {
+  background: #f79646;
+}
+
+.excel-formula-bar-container {
+  flex: none !important;
+  min-height: 31px;
+}
+
+.formula-input-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.formula-input {
+  width: 100%;
+  text-overflow: ellipsis;
+}
+
+#formula-input {
+  user-select: text !important;
+}
+
+.excel-workspace {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+.sheet-content.active {
+  height: 100%;
+  display: block !important;
+}
+
+.table-container {
+  height: 100%;
+  overflow: auto;
+  outline: none;
+  overscroll-behavior: contain;
+}
+
+.excel-sheets-bar {
+  flex: none !important;
+  min-height: 30px;
+  height: auto !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f3f2f1;
+  border-top: 1px solid #d3d3d3;
+}
+
+.sheet-tabs-list {
+  overflow: auto;
+  min-width: 80px;
+  max-width: 65%;
+  gap: 0;
+  white-space: nowrap;
+}
+
+.sheet-tab {
+  flex: none;
+  min-height: 30px;
+  padding: 5px 16px;
+}
+
+.excel-status-bar {
+  gap: 12px;
+  white-space: nowrap;
+  font-size: 11px;
+  padding: 0 12px;
+}
+
+.reader-grid {
+  border-spacing: 0;
+  border-collapse: separate;
+  table-layout: fixed;
+  background: white;
+  width: max-content;
+  font: 11pt Calibri, "Segoe UI", Arial;
+}
+
+.reader-grid td,
+.reader-grid th {
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-right: 1px solid #dedede;
+  border-bottom: 1px solid #dedede;
+  overflow: hidden;
+}
+
+.reader-grid thead th {
+  height: 25px;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: #f3f3f3;
+  color: #333;
+  text-align: center;
+  font: 12px "Segoe UI", Arial;
+  cursor: pointer;
+}
+
+.reader-grid tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f3f3f3;
+  color: #555;
+  text-align: center;
+  font: 11px "Segoe UI", Arial;
+  width: 48px;
+}
+
+.reader-grid thead th:first-child {
+  left: 0;
+  z-index: 6;
+}
+
+.reader-grid td {
+  vertical-align: bottom;
+  cursor: cell;
+}
+
+.reader-cell-inner {
+  padding: 3px 5px;
+  overflow: hidden;
+  white-space: pre;
+  box-sizing: border-box;
+  user-select: text;
+}
+
+.reader-grid td.reader-story .reader-cell-inner {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  font-size: var(--reader-font-size, 11pt);
+  font-family: var(--reader-font-family, Calibri);
+  font-weight: var(--reader-font-weight, normal);
+  font-style: var(--reader-font-style, normal);
+}
+
+.reader-grid td.active-cell {
+  outline: 2px solid #107c41;
+  outline-offset: -2px;
+  position: relative;
+}
+
+.reader-grid .reader-spacer td {
+  border: 0;
+  padding: 0;
+  line-height: 0;
+  font-size: 0;
+}
+
+.reader-grid .active-column {
+  background: #d6e9db;
+}
+
+.reader-grid tbody th.active-row {
+  background: #d6e9db;
+  color: #107c41;
+}
+
+.reader-error {
+  padding: 40px;
+  color: #8d3422;
+  font: 16px Arial;
+  line-height: 1.7;
+}
+
+#reader-notice {
+  position: fixed;
+  bottom: 45px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  background: #333;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 5px;
+  font: 13px Arial;
+  max-width: 80%;
+}
+
+.reader-resize {
+  position: absolute;
+  display: block;
+  z-index: 12;
+  touch-action: none;
+  user-select: none;
+}
+
+.reader-resize.column {
+  right: 0;
+  top: 0;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.reader-resize.row {
+  bottom: 0;
+  left: 0;
+  height: 7px;
+  width: 100%;
+  cursor: row-resize;
+}
+
+.reader-resize:hover {
+  background: #107c4140;
+}
+
+.reader-resizing-column,
+.reader-resizing-column * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+.reader-resizing-row,
+.reader-resizing-row * {
+  cursor: row-resize !important;
+  user-select: none !important;
+}
+
+.reader-cell-editor {
+  position: fixed;
+  z-index: 10001;
+  resize: none;
+  margin: 0;
+  padding: 4px 5px;
+  border: 2px solid #107c41;
+  border-radius: 0;
+  outline: none;
+  background: white;
+  color: #222;
+  font: 11pt Calibri, "Segoe UI", Arial;
+  line-height: 1.45;
+  box-shadow: 0 2px 8px #0002;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text !important;
+}
+
+@media (max-width: 900px) {
+  .center-search {
+    display: none;
+  }
+
+  .document-name {
+    max-width: 240px;
+  }
+
+  .excel-status-bar .sum-item,
+  .excel-status-bar .count-item {
+    display: none;
+  }
+
+  .excel-ribbon-tabs {
+    overflow: auto;
+  }
+
+  .excel-tabs-left {
+    flex: none;
+  }
+
+  .excel-share-btn {
+    display: none;
+  }
+}
