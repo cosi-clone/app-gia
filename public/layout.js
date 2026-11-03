@@ -1,33 +1,6 @@
 (function(root) {
   'use strict';
 
-  function templateEnd(sheet, startRow) {
-    let end = startRow;
-
-    for (const [ref, cell] of sheet.cells) {
-      if (String(cell.value ?? '').trim() === '') continue;
-
-      const row = +(ref.match(/\d+$/)?.[0] || 0);
-      end = Math.max(end, row);
-    }
-
-    // Không cắt ngang ô gộp ở cuối khối mẫu.
-    let extended = true;
-
-    while (extended) {
-      extended = false;
-
-      for (const merge of sheet.merges) {
-        if (merge.a.r <= end && merge.b.r > end) {
-          end = merge.b.r;
-          extended = true;
-        }
-      }
-    }
-
-    return Math.min(sheet.maxR, end);
-  }
-
   function makePlan(book, sheetIndex, column, startRow, chunks) {
     const sheet = book.sheets[sheetIndex];
 
@@ -70,38 +43,40 @@
       )
     ) {
       throw Error(
-        'Dòng bắt đầu cắt ngang một vùng ô gộp. ' +
-        'Chọn dòng đầu vùng gộp hoặc dòng ngay sau vùng đó.'
+        'Dòng bắt đầu cắt ngang ô gộp. ' +
+        'Hãy chọn dòng đầu ô gộp hoặc dòng ngay sau ô gộp.'
       );
     }
 
-    const endRow = templateEnd(sheet, startRow);
+    // Lặp nguyên khối từ hàng bắt đầu đến hết sheet.
+    const endRow = sheet.maxR;
+    const blockLength = endRow - startRow + 1;
+
+    // Những hàng có thể chèn truyện trong mỗi khối.
     const eligible = [];
 
-    for (let r = startRow; r <= endRow; r++) {
-      if (sheet.rows.get(r)?.hidden) continue;
+    for (let row = startRow; row <= endRow; row++) {
+      if (sheet.rows.get(row)?.hidden) continue;
 
       const merged = sheet.merges.some(
         merge =>
-          r >= merge.a.r &&
-          r <= merge.b.r &&
+          row >= merge.a.r &&
+          row <= merge.b.r &&
           column >= merge.a.c &&
           column <= merge.b.c
       );
 
       if (merged) continue;
 
-      eligible.push(r);
+      eligible.push(row);
     }
 
     if (!eligible.length) {
       throw Error(
-        'Vùng chọn không có ô phù hợp: ' +
-        'các dòng đang ẩn hoặc cột nằm trong ô gộp.'
+        'Vùng chọn không có ô phù hợp để chèn truyện: ' +
+        'các hàng đang ẩn hoặc cột nằm trong ô gộp.'
       );
     }
-
-    const blockLength = endRow - startRow + 1;
 
     const copies = Math.max(
       1,
@@ -114,7 +89,7 @@
     if (totalRows > 100000) {
       throw Error(
         'Số hàng sau khi lặp vượt 100.000. ' +
-        'Chọn vùng mẫu ngắn hơn hoặc chia truyện.'
+        'Hãy chọn khối mẫu ngắn hơn hoặc chia truyện.'
       );
     }
 
@@ -122,10 +97,10 @@
     const storyAt = new Map();
 
     for (let copy = 0; copy < copies; copy++) {
-      for (const row of eligible) {
+      for (const source of eligible) {
         if (storyRows.length >= chunks.length) break;
 
-        const target = row + copy * blockLength;
+        const target = source + copy * blockLength;
 
         storyAt.set(target, storyRows.length);
         storyRows.push(target);
@@ -146,14 +121,17 @@
     };
   }
 
+  // Mọi cột ở hàng lặp đều đọc lại cùng một hàng nguồn.
   function sourceRow(sheet, plan, row) {
-    const end = plan.endRow ?? sheet.maxR;
+    const endRow = plan.endRow ?? sheet.maxR;
 
-    if (row <= end) return row;
+    if (row <= endRow) {
+      return row;
+    }
 
     return (
       plan.startRow +
-      (row - plan.startRow) % plan.blockLength
+      ((row - endRow - 1) % plan.blockLength)
     );
   }
 
@@ -189,24 +167,27 @@
     const ref =
       root.ExcelWorkbook.colName(column) + source;
 
-    const cell = sheet.cells.get(ref) || {
+    // Luôn lấy nội dung và định dạng Excel gốc trước.
+    const original = sheet.cells.get(ref) || {
       value: '',
       style: sheet.cols.get(column)?.style || 0
     };
 
+    // Chỉ chèn đè cột truyện khi đang bật chế độ truyện.
+    // Reader đặt column = -1 khi nhấn B để hiện Excel gốc.
     if (
       column === plan.column &&
       plan.storyAt.has(row)
     ) {
       return {
-        ...cell,
+        ...original,
         value: chunks[plan.storyAt.get(row)],
         story: true
       };
     }
 
     return {
-      ...cell,
+      ...original,
       story: false
     };
   }
