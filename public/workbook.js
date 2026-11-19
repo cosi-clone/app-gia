@@ -44,9 +44,17 @@ let styles=[],theme=[],palette=[];
       for(const side of ['left','right','top','bottom']){
         const edge=first(border,side), style=edge?.getAttribute('style');
         if(!style||style==='none')continue;
-        const width=style==='double'||style==='thick'?3:/medium/i.test(style)?2:1;
-        const type=style==='double'?'double':/dash/i.test(style)?'dashed':style==='dotted'||style==='hair'?'dotted':'solid';
-        css['border'+side[0].toUpperCase()+side.slice(1)]=`${width}px ${type} ${color(first(edge,'color'),'#000000')}`;
+
+const type = /dash/i.test(style)
+  ? 'dashed'
+  : style === 'dotted' || style === 'hair'
+    ? 'dotted'
+    : 'solid';
+
+css[
+  'border' + side[0].toUpperCase() + side.slice(1)
+] = `${width}px ${type} #c4c4c4`;
+       
       }
       return css;
     });
