@@ -1,7 +1,8 @@
 (function(root) {
   'use strict';
 
-  const M = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+  const M =
+    'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
 
   const children = (e, tag) =>
     e ? [...e.children].filter(x => x.localName === tag) : [];
@@ -16,7 +17,10 @@
       : '';
 
   const xml = s => {
-    const d = new DOMParser().parseFromString(s, 'application/xml');
+    const d = new DOMParser().parseFromString(
+      s,
+      'application/xml'
+    );
 
     if (d.querySelector('parsererror')) {
       throw Error('XML không hợp lệ trong XLSX.');
@@ -77,10 +81,26 @@
 
   function loadStyles(d) {
     const element = d.documentElement;
-    const fonts = children(first(element, 'fonts'), 'font');
-    const fills = children(first(element, 'fills'), 'fill');
-    const borders = children(first(element, 'borders'), 'border');
-    const bases = children(first(element, 'cellStyleXfs'), 'xf');
+
+    const fonts = children(
+      first(element, 'fonts'),
+      'font'
+    );
+
+    const fills = children(
+      first(element, 'fills'),
+      'fill'
+    );
+
+    const borders = children(
+      first(element, 'borders'),
+      'border'
+    );
+
+    const bases = children(
+      first(element, 'cellStyleXfs'),
+      'xf'
+    );
 
     palette = children(
       first(first(element, 'colors'), 'indexedColors'),
@@ -182,18 +202,37 @@
 
         if (!style || style === 'none') continue;
 
-        const type = /dash/i.test(style)
-          ? 'dashed'
-          : style === 'dotted' || style === 'hair'
-            ? 'dotted'
-            : 'solid';
+        const originalWidth =
+          style === 'double' || style === 'thick'
+            ? 3
+            : /medium/i.test(style)
+              ? 2
+              : 1;
+
+        const width = style === 'double'
+          ? 3
+          : originalWidth * 0.75;
+
+        const type = style === 'double'
+          ? 'double'
+          : /dash/i.test(style)
+            ? 'dashed'
+            : style === 'dotted' || style === 'hair'
+              ? 'dotted'
+              : 'solid';
+
+        const borderColor = color(
+          first(edge, 'color'),
+          '#000000'
+        );
 
         const property =
           'border' +
           side[0].toUpperCase() +
           side.slice(1);
 
-        css[property] = `1px ${type} #c4c4c4`;
+        css[property] =
+          `${width}px ${type} ${borderColor}`;
       }
 
       return css;
