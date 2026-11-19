@@ -7,4 +7,12 @@ $('code-form').onsubmit=async e=>{e.preventDefault();busy(true);message('Đang k
 $('send-verify').onclick=async()=>{busy(true);try{await sendEmailVerification(auth.currentUser);message('Đã gửi email xác minh. Kiểm tra cả thư mục Spam.');}catch(error){message(authError(error));}finally{busy(false);}};
 $('check-verify').onclick=async()=>{busy(true);try{await reload(auth.currentUser);await auth.currentUser.getIdToken(true);const me=await refresh();message(me.emailVerified?'Email đã xác minh. Bạn có thể nhập mã.':'Email vẫn chưa xác minh. Mở liên kết trong email rồi thử lại.');}catch(error){message(authError(error));}finally{busy(false);}};
 $('logout').onclick=async()=>{await signOut(auth);location.replace('/login.html');};
-refresh().catch(error=>message(authError(error)));
+refresh().catch(error=>message(authError(error))); 
+
+
+
+
+
+
+
+//ddeer tueehdshhd
