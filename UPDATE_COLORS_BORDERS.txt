@@ -1,0 +1,21 @@
+CẬP NHẬT MÀU VÀ ĐƯỜNG VIỀN
+
+Chép đè 6 file trong thư mục public:
+- xlsx-colors.js (file mới)
+- workbook.js
+- index.html
+- reader.html
+- reader.js
+- reader.css
+
+Deploy lại. Tải lại trang bằng Cmd+Shift+R (Mac) hoặc Ctrl+Shift+R.
+Chọn lại PDF và XLSX, rồi mở phiên đọc mới. Phiên đọc cũ giữ bảng màu đã lưu trước đó.
+
+Chọn một ô, hoặc giữ Shift và bấm ô cuối để chọn vùng.
+Bấm nút Borders (biểu tượng ô vuông cạnh B/I/U trong thanh Font).
+Chọn màu nét, độ dày, kiểu nét, rồi chọn vị trí viền.
+Có thể xóa viền, khôi phục viền gốc, Ctrl/Cmd+Z để Undo.
+Thay đổi viền lưu trong phiên đọc trên trình duyệt, không sửa file XLSX gốc.
+
+Bộ đọc bổ sung màu RGB, indexed/custom palette, theme+tint, định dạng hàng/cột và kiểu viền đôi.
+Màu từ conditional formatting, Table Style, gradient/pattern phức tạp chưa được tái tạo đầy đủ.

@@ -13,6 +13,7 @@
     
 <link rel="stylesheet" href="excel-reference.css">
 <link rel="stylesheet" href="reader.css">
+<script src="xlsx-colors.js" defer></script>
 <script src="workbook.js" defer></script>
 <script src="layout.js" defer></script>
 <script src="session.js" defer></script>
@@ -236,7 +237,7 @@
                             <u>U</u>
                             <span style="font-size: 8px;">&#9662;</span>
                         </button>
-                        <button class="tool-btn tool-btn-with-chevron" title="Borders">
+                        <button class="tool-btn tool-btn-with-chevron" id="reader-borders-button" title="Đường viền ô" aria-haspopup="dialog" aria-expanded="false">
                             <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
                                 <rect x="2" y="2" width="12" height="12" fill="none" stroke="#323130" stroke-width="1.2"/>
                                 <line x1="8" y1="2" x2="8" y2="14" stroke="#323130" stroke-width="1.2"/>
@@ -633,6 +634,21 @@
         </div>
     </footer>
 
+<div id="reader-borders-menu" class="reader-borders-menu" role="dialog" aria-label="Đường viền ô" hidden>
+  <strong>Đường viền ô</strong>
+  <p>Giữ Shift và bấm ô cuối để chọn vùng.</p>
+  <label>Màu nét <input id="reader-border-color" type="color" value="#000000"></label>
+  <label>Độ dày <select id="reader-border-width"><option value="1">Mảnh</option><option value="2">Vừa</option><option value="3">Dày</option></select></label>
+  <label>Kiểu nét <select id="reader-border-style"><option value="solid">Liền</option><option value="dashed">Đứt</option><option value="dotted">Chấm</option><option value="double">Đôi</option></select></label>
+  <div class="reader-border-actions">
+    <button type="button" data-border="all">Tất cả viền</button><button type="button" data-border="outside">Viền ngoài</button>
+    <button type="button" data-border="inside">Viền bên trong</button><button type="button" data-border="horizontal">Viền ngang trong</button>
+    <button type="button" data-border="vertical">Viền dọc trong</button><button type="button" data-border="none">Xóa viền</button>
+    <button type="button" data-border="top">Viền trên</button><button type="button" data-border="bottom">Viền dưới</button>
+    <button type="button" data-border="left">Viền trái</button><button type="button" data-border="right">Viền phải</button>
+    <button type="button" data-border="reset">Khôi phục viền gốc</button>
+  </div>
+</div>
 <div id="reader-notice" role="status" hidden></div>
 </body>
 </html>

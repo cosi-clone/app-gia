@@ -9,23 +9,45 @@
   const colName = n => { let s = ''; for (; n; n = Math.floor((n - 1) / 26)) s = String.fromCharCode(65 + (n - 1) % 26) + s; return s; };
   const addr = s => { const m = /^([A-Z]+)(\d+)$/i.exec(s); if (!m) throw Error('Địa chỉ ô không hợp lệ.'); return {c:colNum(m[1]), r:+m[2]}; };
   const range = s => { const a = s.split(':'); return {a:addr(a[0]), b:addr(a[1] || a[0])}; };
-let styles=[],theme=[];
-  function color(e) {
-    if (!e) return '';
-    if (e.hasAttribute('rgb')) return '#' + e.getAttribute('rgb').slice(-6);
-    if (e.hasAttribute('theme')) return theme[+e.getAttribute('theme')] || '';
-    const indexed = {0:'#000000',1:'#ffffff',2:'#ff0000',3:'#00ff00',4:'#0000ff',5:'#ffff00',6:'#ff00ff',7:'#00ffff',64:'#000000',65:'#ffffff'};
-    return indexed[e.getAttribute('indexed')] || '';
-  }
+let styles=[],theme=[],palette=[];
+  const color = (element, fallback='') => root.XlsxColors.resolve(element,theme,palette,fallback);
   function loadStyles(d) {
-    const root = d.documentElement, fonts = children(first(root,'fonts'),'font'), fills = children(first(root,'fills'),'fill'), borders = children(first(root,'borders'),'border');
-    return children(first(root,'cellXfs'),'xf').map(x => {
-      const f = fonts[+x.getAttribute('fontId')], fill = fills[+x.getAttribute('fillId')], border = borders[+x.getAttribute('borderId')], a = first(x,'alignment');
-      const css = {};
-      if (f) { css.fontFamily = first(f,'name')?.getAttribute('val') || 'Calibri'; css.fontSize = (first(f,'sz')?.getAttribute('val') || 11) + 'pt'; css.fontWeight = first(f,'b') && first(f,'b').getAttribute('val') !== '0' ? 'bold' : 'normal'; css.fontStyle = first(f,'i') ? 'italic' : 'normal'; css.color = color(first(f,'color')); if(first(f,'u')) css.textDecoration = 'underline'; }
-      const pattern = first(fill,'patternFill'); if (pattern?.getAttribute('patternType') === 'solid') css.backgroundColor = color(first(pattern,'fgColor'));
-      if (a) { const h = a.getAttribute('horizontal'); if(['left','right','center','justify'].includes(h)) css.textAlign = h; const v = a.getAttribute('vertical'); css.verticalAlign = v === 'center' ? 'middle' : v || 'bottom'; if(a.getAttribute('wrapText') === '1') css.whiteSpace = 'pre-wrap'; }
-      for(const side of ['left','right','top','bottom']) { const b = first(border,side), s = b?.getAttribute('style'); if (s) css['border' + side[0].toUpperCase() + side.slice(1)] = `${/medium|thick/.test(s) ? 2 : 1}px ${/dash/i.test(s) ? 'dashed' : s === 'dotted' ? 'dotted' : 'solid'} ${color(first(b,'color')) || '#222'}`; }
+    const element=d.documentElement;
+    const fonts=children(first(element,'fonts'),'font');
+    const fills=children(first(element,'fills'),'fill');
+    const borders=children(first(element,'borders'),'border');
+    const bases=children(first(element,'cellStyleXfs'),'xf');
+    palette=children(first(first(element,'colors'),'indexedColors'),'rgbColor').map(c=>c.getAttribute('rgb'));
+    return children(first(element,'cellXfs'),'xf').map(x=>{
+      const base=bases[+x.getAttribute('xfId')||0];
+      const id=name=>+(x.getAttribute('apply'+name[0].toUpperCase()+name.slice(1))==='0'
+        ? base?.getAttribute(name+'Id')||0
+        : x.getAttribute(name+'Id')??base?.getAttribute(name+'Id')??0);
+      const font=fonts[id('font')], fill=fills[id('fill')], border=borders[id('border')];
+      const a=first(x,'alignment')||first(base,'alignment');
+      const css={color:'#000000'};
+      if(font){
+        css.fontFamily=first(font,'name')?.getAttribute('val')||'Calibri';
+        css.fontSize=(first(font,'sz')?.getAttribute('val')||11)+'pt';
+        css.fontWeight=first(font,'b')&& !['0','false'].includes(first(font,'b').getAttribute('val'))?'bold':'normal';
+        css.fontStyle=first(font,'i')&& !['0','false'].includes(first(font,'i').getAttribute('val'))?'italic':'normal';
+        css.color=color(first(font,'color'),'#000000');
+        if(first(font,'u')&&first(font,'u').getAttribute('val')!=='none')css.textDecoration='underline';
+      }
+      const pattern=first(fill,'patternFill');
+      if(pattern?.getAttribute('patternType')==='solid')css.backgroundColor=color(first(pattern,'fgColor'),'#FFFFFF');
+      if(a){
+        const h=a.getAttribute('horizontal');if(['left','right','center','justify'].includes(h))css.textAlign=h;
+        const v=a.getAttribute('vertical');css.verticalAlign=v==='center'?'middle':v||'bottom';
+        if(a.getAttribute('wrapText')==='1')css.whiteSpace='pre-wrap';
+      }
+      for(const side of ['left','right','top','bottom']){
+        const edge=first(border,side), style=edge?.getAttribute('style');
+        if(!style||style==='none')continue;
+        const width=style==='double'||style==='thick'?3:/medium/i.test(style)?2:1;
+        const type=style==='double'?'double':/dash/i.test(style)?'dashed':style==='dotted'||style==='hair'?'dotted':'solid';
+        css['border'+side[0].toUpperCase()+side.slice(1)]=`${width}px ${type} ${color(first(edge,'color'),'#000000')}`;
+      }
       return css;
     });
   }
@@ -36,7 +58,7 @@ let styles=[],theme=[];
     const wb = await read('xl/workbook.xml'), rels = await read('xl/_rels/workbook.xml.rels');
     const links = new Map([...rels.documentElement.children].map(r => [r.getAttribute('Id'), r.getAttribute('Target')]));
     const strings = z.file('xl/sharedStrings.xml') ? children((await read('xl/sharedStrings.xml')).documentElement,'si').map(txt) : [];
-    theme = [];
+    theme = []; palette = [];
     if(z.file('xl/theme/theme1.xml')) { const td = await read('xl/theme/theme1.xml'), cs = [...td.getElementsByTagName('*')].find(e => e.localName === 'clrScheme'); const order = ['lt1','dk1','lt2','dk2','accent1','accent2','accent3','accent4','accent5','accent6','hlink','folHlink']; theme = order.map(k => { const c = first(cs,k)?.firstElementChild; return c ? '#' + (c.getAttribute('lastClr') || c.getAttribute('val')) : ''; }); }
     styles = z.file('xl/styles.xml') ? loadStyles(await read('xl/styles.xml')) : [];
     const sheets = [];
@@ -45,8 +67,9 @@ let styles=[],theme=[];
       if(!target) continue;
       const path = new URL(target, 'https://xlsx.local/xl/workbook.xml').pathname.slice(1);
       const d = (await read(path)).documentElement, cells = new Map(), rows = new Map(), cols = new Map(); let maxR = 1, maxC = 1;
-      for(const row of children(first(d,'sheetData'),'row')) { rows.set(+row.getAttribute('r'), {height:+row.getAttribute('ht') || 15, hidden:row.getAttribute('hidden') === '1'}); for(const c of children(row,'c')) { const ref=c.getAttribute('r'), p=addr(ref), v=first(c,'v')?.textContent || '', t=c.getAttribute('t'); const value=t === 's' ? strings[+v] || '' : t === 'inlineStr' ? txt(first(c,'is')) : t === 'b' ? (v === '1' ? 'TRUE' : 'FALSE') : v; cells.set(ref,{value,style:+c.getAttribute('s') || 0}); maxR=Math.max(maxR,p.r); maxC=Math.max(maxC,p.c); } }
+      for(const row of children(first(d,'sheetData'),'row')) { rows.set(+row.getAttribute('r'), {height:+row.getAttribute('ht') || 15, hidden:row.getAttribute('hidden') === '1',style:row.hasAttribute('s')?+row.getAttribute('s'):undefined}); for(const c of children(row,'c')) { const ref=c.getAttribute('r'), p=addr(ref), v=first(c,'v')?.textContent || '', t=c.getAttribute('t'); const value=t === 's' ? strings[+v] || '' : t === 'inlineStr' ? txt(first(c,'is')) : t === 'b' ? (v === '1' ? 'TRUE' : 'FALSE') : v; cells.set(ref,{value,style:c.hasAttribute('s')?+c.getAttribute('s'):row.hasAttribute('s')?+row.getAttribute('s'):null}); maxR=Math.max(maxR,p.r); maxC=Math.max(maxC,p.c); } }
       for(const c of children(first(d,'cols'),'col')) for(let i=+c.getAttribute('min');i<=+c.getAttribute('max');i++) cols.set(i,{width:Math.max(20,(+c.getAttribute('width') || 9)*7+5),hidden:c.getAttribute('hidden')==='1',style:+c.getAttribute('style')||0});
+      for(const [ref,cell] of cells){if(cell.style===null)cell.style=cols.get(addr(ref).c)?.style||0;}
       const merges=children(first(d,'mergeCells'),'mergeCell').map(m=>range(m.getAttribute('ref')));
       for(const m of merges) {maxR=Math.max(maxR,m.b.r);maxC=Math.max(maxC,m.b.c);}
       if(maxC>500 || maxR>100000) throw Error('Template vượt giới hạn hiển thị 500 cột / 100.000 dòng.');
